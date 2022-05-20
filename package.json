@@ -1,0 +1,11 @@
+{
+  "name": "NFT-CandleSticks",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/TylorEM/NFT-CandleSticks.git",
+  "author": "TylorEM <TylorEM@users.noreply.github.com>",
+  "license": "MIT",
+  "dependencies": {
+    "parcel": "^2.5.0"
+  }
+}
