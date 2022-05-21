@@ -534,7 +534,26 @@ API.get('/kaiju-kingz/stats').then((data)=>console.log(data.stats.floor_price)
 ).catch((err)=>console.error(err)
 );
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./helpers":"9Ty9u"}],"gkKU3":[function(require,module,exports) {
+},{"./helpers":"9Ty9u","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9Ty9u":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+class FetchWrapper {
+    constructor(baseURL){
+        this.baseURL = baseURL;
+    }
+    get(endpoint) {
+        return fetch(this.baseURL + endpoint, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json'
+            }
+        }).then((response)=>response.json()
+        );
+    }
+}
+exports.default = FetchWrapper;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -564,25 +583,6 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"9Ty9u":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-class FetchWrapper {
-    constructor(baseURL){
-        this.baseURL = baseURL;
-    }
-    get(endpoint) {
-        return fetch(this.baseURL + endpoint, {
-            method: 'GET',
-            headers: {
-                Accept: 'application/json'
-            }
-        }).then((response)=>response.json()
-        );
-    }
-}
-exports.default = FetchWrapper;
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["aPJuQ","bB7Pu"], "bB7Pu", "parcelRequire5876")
+},{}]},["aPJuQ","bB7Pu"], "bB7Pu", "parcelRequire5876")
 
 //# sourceMappingURL=index.3d214d75.js.map
