@@ -527,11 +527,26 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"bB7Pu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+// Importing the Default Class "FetchWrapper" from the helper.js Module.
 var _helpers = require("./helpers");
 var _helpersDefault = parcelHelpers.interopDefault(_helpers);
-const API = new _helpersDefault.default('https://api.opensea.io/api/v1/collection');
-API.get('/kaiju-kingz/stats').then((data)=>console.log(data.stats.floor_price)
-).catch((err)=>console.error(err)
+// Creating a Variable called "API" which contains the FetchWrapper Class w/ the baseURL as its Argument.
+const API = new _helpersDefault.default('https://api.opensea.io/api/v1/');
+// Creating a hard coded Variable (for now) called "collectionSlug" which contains the Collection-Slug of the NFT.
+const collectionSlug = 'kaiju-kingz';
+// DOM Selector for the Element w/ the Class Name of 'nft-name'.
+const nftName = document.querySelector('.nft-name');
+// Receiving data from the OpenSea API using the FetchWrapper Class' "get" method.
+API.get(`asset_contract/0x0c2E57EFddbA8c768147D1fdF9176a0A6EBd5d83`).then((data)=>{
+    // Dynamically adding Text Content to the nftName
+    nftName.textContent = data.name;
+}).catch((err)=>console.error(err)
+);
+// Receiving data from the OpenSea API using the FetchWrapper Class' "getWithHeaders" method.
+API.getWithHeaders(`collection/${endpoint}/stats`).then((data)=>{
+    // Testing to see if the API was accessed by visualizing the requested Data to the Console.
+    console.log(data.stats.floor_price);
+}).catch((err)=>console.error(err)
 );
 
 },{"./helpers":"9Ty9u","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9Ty9u":[function(require,module,exports) {
@@ -541,13 +556,20 @@ class FetchWrapper {
     constructor(baseURL){
         this.baseURL = baseURL;
     }
-    get(endpoint) {
+    // "get" Method that accepts an API Endpoint as its Parameter.
+    getWithHeaders(endpoint) {
+        // Fetching the complete URL and returning its Response as a Promise.
         return fetch(this.baseURL + endpoint, {
             method: 'GET',
             headers: {
                 Accept: 'application/json'
             }
         }).then((response)=>response.json()
+        );
+    }
+    get(endpoint) {
+        // Fetching the complete URL and returning its Response as a Promise.
+        return fetch(this.baseURL + endpoint).then((response)=>response.json()
         );
     }
 }
