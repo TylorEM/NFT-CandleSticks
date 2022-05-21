@@ -19,7 +19,7 @@ API.get(`asset_contract/0x0c2E57EFddbA8c768147D1fdF9176a0A6EBd5d83`)
   .catch((err) => console.error(err));
 
 // Receiving data from the OpenSea API using the FetchWrapper Class' "getWithHeaders" method.
-API.getWithHeaders(`collection/${endpoint}/stats`)
+API.getWithHeaders(`collection/${collectionSlug}/stats`)
   .then((data) => {
     // Testing to see if the API was accessed by visualizing the requested Data to the Console.
     console.log(data.stats.floor_price);
