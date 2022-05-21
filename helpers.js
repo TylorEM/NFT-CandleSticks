@@ -4,7 +4,7 @@ export default class FetchWrapper {
   }
 
   get(endpoint) {
-    //return fetch(this.baseURL + endpoint, {
+    return fetch(this.baseURL + endpoint, {
       method: 'GET',
       headers: { Accept: 'application/json' },
     }).then((response) => response.json());
