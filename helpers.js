@@ -4,7 +4,7 @@ export default class FetchWrapper {
     this.baseURL = baseURL;
   }
 
-  // "get" Method that accepts an API Endpoint as its Parameter.
+  //  "GET" Method that accepts an API Endpoint as its Parameter w/Headers.
   getWithHeaders(endpoint) {
     // Fetching the complete URL and returning its Response as a Promise.
     return fetch(this.baseURL + endpoint, {
@@ -13,6 +13,7 @@ export default class FetchWrapper {
     }).then((response) => response.json());
   }
 
+  //"GET" Method that accepts an API Endpoint as its Parameter.
   get(endpoint) {
     // Fetching the complete URL and returning its Response as a Promise.
     return fetch(this.baseURL + endpoint).then((response) => response.json());
