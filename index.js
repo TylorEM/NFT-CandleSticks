@@ -5,33 +5,56 @@ import FetchWrapper from './helpers';
 const API = new FetchWrapper('https://api.opensea.io/api/v1/');
 
 // DOM Selectors for HTML Elements.
-const nftName = document.querySelector('.nft-name');
-const datasetContainer = document.querySelector('.dataset-container');
+//* Id
 const nftSearchForm = document.querySelector('#nft-search-form');
 const nftSearchAddress = document.querySelector('#nft-search-address');
+const errorMessage = document.querySelector('#address-error');
+
+//* Class
+const nftName = document.querySelector('.nft-name');
+const datasetContainer = document.querySelector('.dataset-container');
 
 // Creating a hard coded Variable (for now) called "collectionSlug" which contains the Collection-Slug of the NFT.
 const collectionSlug = 'kaiju-kingz';
 
-//Todo Figure out how to search for the contract address in the form and convert it into the name of the nft project.
-const nftAddress = nftSearchAddress.value;
-console.log(nftAddress);
-
-nftSearchForm.addEventListener('submit');
-
-const addressToNameConvert = (addresses) => {
-  if (addresses) {
-    addresses.find((address) => {
-      console.log(address);
-      address === nftAddress;
-    });
-  }
+//*Functions
+// Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
+const searchAddressSubmit = () => {
+  // Creating a Variable "newError" with the Error message.
+  const newError = new Error('Enter the contract address.');
+  const messageString = newError.toString();
+  // Form EventListener
+  nftSearchForm.addEventListener('submit', (event) => {
+    // Prevents the DOM from reloading after submission. This is the default action when submitting forms.
+    event.preventDefault();
+    // Test to see if the Text Input Value is accessible.
+    console.log(nftSearchAddress.value);
+    // If Else statement
+    if (nftSearchAddress.value.length === 42) {
+      console.log(nftSearchAddress.value.length);
+    } else {
+      errorMessage.textContent = messageString;
+    }
+  });
 };
+
+// Created a Function "focusedInput" that adds an EventListener to the search Text Input ("nftSearchAddress") that listens for the search bar to be focused in on. It then clears the search bar's Value and the "errorMessage" Elements Text Content.
+const focusedInput = () => {
+  nftSearchAddress.addEventListener('focus', () => {
+    nftSearchAddress.value = '';
+    errorMessage.textContent = '';
+  });
+};
+
+//*Function Calls
+searchAddressSubmit();
+focusedInput();
 
 // Receiving data from the OpenSea API using the FetchWrapper Class' "get" method.
 API.get(`asset_contract/0x0c2E57EFddbA8c768147D1fdF9176a0A6EBd5d83`)
   .then((data) => {
     // Dynamically adding Text Content to the nftName
+    console.log(data.name);
     nftName.textContent = data.name;
   })
   // Using the .catch Method to console log the error, "err", when the Fetch call runs a Promise that ends in a rejected state (ie. Network connection issue).
@@ -43,7 +66,7 @@ API.getWithHeaders(`collection/${collectionSlug}/stats`)
     // Testing to see if the API was accessed by visualizing the requested Data to the Console.
     console.log(data.stats.floor_price);
 
-    // The statsKeys variable accesses the keys that are in the "data.stats" Object.
+    //? The statsKeys variable accesses the keys that are in the "data.stats" Object.
     const statsKeys = Object.keys(data.stats);
     // Visualizing the keys available within the "data.stats" Object.
     console.log(statsKeys);
