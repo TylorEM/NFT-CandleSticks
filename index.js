@@ -15,9 +15,39 @@ const nftName = document.querySelector('.nft-name');
 const datasetContainer = document.querySelector('.dataset-container');
 
 // Creating a hard coded Variable (for now) called "collectionSlug" which contains the Collection-Slug of the NFT.
-const collectionSlug = 'kaiju-kingz';
 
 //*Functions
+
+// Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
+const getApiName = () => {
+  API.getWithHeaders(`asset_contract/${nftSearchAddress.value}`)
+    .then((contractData) => {
+      // Dynamically adding Text Content to the nftName
+      console.log(contractData.name);
+      nftName.textContent = contractData.name;
+      console.log(contractData.collection.slug);
+
+      // Making a Fetch call within the first Fetch call b/c I need to access the "contractData.collection.slug" data in order to make the second Fetch call.
+      //? Possibly could just use the "getWithHeaders" Class Method. Testing Soon...
+      API.get(`collection/${contractData.collection.slug}/stats`)
+        .then((statsData) => {
+          // Testing to see if the floor price data is received.
+          console.log(statsData.stats.floor_price);
+          // Accessing all of the stats Keys and placing them in a created Variable "statsKeys"
+          const statsKeys = Object.keys(statsData.stats);
+          // Accessing the "floor-price" Key by Looping through the "statsKeys" with the .find Method and placing it within the Variable "floorPriceKey"
+          const floorPriceKey = statsKeys
+            .find((key) => key === 'floor_price')
+            // Using the .replace Method to switch the "_" to a " ".
+            .replace('_', ' ');
+          datasetContainer.innerHTML = `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`;
+        })
+        .catch((err) => console.error(err));
+    })
+    // Using the .catch Method to console log the error, "err", when the Fetch call runs a Promise that ends in a rejected state (ie. Network connection issue).
+    .catch((err) => console.error(err));
+};
+
 // Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
 const searchAddressSubmit = () => {
   // Creating a Variable "newError" with the Error message.
@@ -32,6 +62,8 @@ const searchAddressSubmit = () => {
     // If Else statement
     if (nftSearchAddress.value.length === 42) {
       console.log(nftSearchAddress.value.length);
+      //* Function call within the "if" statement that runs the "getAPIName" Function.
+      getApiName();
     } else {
       errorMessage.textContent = messageString;
     }
@@ -43,40 +75,15 @@ const focusedInput = () => {
   nftSearchAddress.addEventListener('focus', () => {
     nftSearchAddress.value = '';
     errorMessage.textContent = '';
+    nftName.textContent = '';
+    datasetContainer.innerHTML = '';
   });
 };
+
+//const addressToName = () => {
+//  if(nftSearchAddress.value === )
+//}
 
 //*Function Calls
 searchAddressSubmit();
 focusedInput();
-
-// Receiving data from the OpenSea API using the FetchWrapper Class' "get" method.
-API.get(`asset_contract/0x0c2E57EFddbA8c768147D1fdF9176a0A6EBd5d83`)
-  .then((data) => {
-    // Dynamically adding Text Content to the nftName
-    console.log(data.name);
-    nftName.textContent = data.name;
-  })
-  // Using the .catch Method to console log the error, "err", when the Fetch call runs a Promise that ends in a rejected state (ie. Network connection issue).
-  .catch((err) => console.error(err));
-
-// Receiving data from the OpenSea API using the FetchWrapper Class' "getWithHeaders" Method.
-API.getWithHeaders(`collection/${collectionSlug}/stats`)
-  .then((data) => {
-    // Testing to see if the API was accessed by visualizing the requested Data to the Console.
-    console.log(data.stats.floor_price);
-
-    //? The statsKeys variable accesses the keys that are in the "data.stats" Object.
-    const statsKeys = Object.keys(data.stats);
-    // Visualizing the keys available within the "data.stats" Object.
-    console.log(statsKeys);
-    // Using the .find Method on the statsKeys Variable to access the "floor_price" Key and placing it inside of the "floorPriceKey" Variable.
-    const floorPriceKey = statsKeys
-      .find((key) => key === 'floor_price')
-      // Using the .replace Method to switch the "_" to a " ".
-      .replace('_', ' ');
-
-    //Dynamically adding an li Element w/ the "floorPriceKey" and floor price of the nft project using the .innerHTML Method to the "datasetContainer" Variable's ul Element.
-    datasetContainer.innerHTML = `<li class="data"><strong>${floorPriceKey}</strong>: ${data.stats.floor_price}</li>`;
-  })
-  .catch((err) => console.error(err));
