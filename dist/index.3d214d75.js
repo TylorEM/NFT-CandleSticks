@@ -532,16 +532,15 @@ var _helpers = require("./helpers");
 var _helpersDefault = parcelHelpers.interopDefault(_helpers);
 // Creating a Variable called "API" which contains the FetchWrapper Class w/ the baseURL as its Argument.
 const API = new _helpersDefault.default('https://api.opensea.io/api/v1/');
-// DOM Selectors for HTML Elements.
-//* Id
+//* DOM Selectors for HTML Elements.
+// Id
 const nftSearchForm = document.querySelector('#nft-search-form');
 const nftSearchAddress = document.querySelector('#nft-search-address');
 const errorMessage = document.querySelector('#address-error');
-//* Class
+// Class
 const nftName = document.querySelector('.nft-name');
 const datasetContainer = document.querySelector('.dataset-container');
-// Creating a hard coded Variable (for now) called "collectionSlug" which contains the Collection-Slug of the NFT.
-//*Functions
+//*Functions & API Calls
 // Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
 const getApiName = ()=>{
     API.getWithHeaders(`asset_contract/${nftSearchAddress.value}`).then((contractData)=>{
@@ -560,7 +559,19 @@ const getApiName = ()=>{
             const floorPriceKey = statsKeys.find((key)=>key === 'floor_price'
             )// Using the .replace Method to switch the "_" to a " ".
             .replace('_', ' ');
-            datasetContainer.innerHTML = `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`;
+            //* Functions and Variables for the One Day Average Price
+            const oneDayAveragePriceString = statsKeys.find((key)=>key === 'one_day_average_price'
+            ).replaceAll('_', ' ');
+            const oneDayAveragePriceData = statsData.stats.one_day_average_price;
+            console.log(oneDayAveragePriceData.toString().length);
+            const oneDayAveragePrice = ()=>{
+                if (oneDayAveragePriceData.toString().length > 4) return oneDayAveragePriceData.toString().substring(0, 5);
+            };
+            //* Appending (using .insertAdjacentHTML b/c we are adding HTML to the index.html module) child li Elements to the datasetContainer DOM Selector ul and adding in various stats from the OpenSea API.
+            // Appending the Floor Price.
+            datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`);
+            // Appending the One Day Average Price.
+            datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${oneDayAveragePriceString}</strong>: ${oneDayAveragePrice()}</li>`);
         }).catch((err)=>console.error(err)
         );
     })// Using the .catch Method to console log the error, "err", when the Fetch call runs a Promise that ends in a rejected state (ie. Network connection issue).
@@ -572,7 +583,7 @@ const searchAddressSubmit = ()=>{
     // Creating a Variable "newError" with the Error message.
     const newError = new Error('Enter the contract address.');
     const messageString = newError.toString();
-    // Form EventListener
+    //* Form EventListener
     nftSearchForm.addEventListener('submit', (event)=>{
         // Prevents the DOM from reloading after submission. This is the default action when submitting forms.
         event.preventDefault();
@@ -581,9 +592,10 @@ const searchAddressSubmit = ()=>{
         // If Else statement
         if (nftSearchAddress.value.length === 42) {
             console.log(nftSearchAddress.value.length);
-            //* Function call within the "if" statement that runs the "getAPIName" Function.
+            // Function call within the "if" statement that runs the "getAPIName" Function.
             getApiName();
-        } else errorMessage.textContent = messageString;
+        } else // Showing error message within the DOM
+        errorMessage.textContent = messageString;
     });
 };
 // Created a Function "focusedInput" that adds an EventListener to the search Text Input ("nftSearchAddress") that listens for the search bar to be focused in on. It then clears the search bar's Value and the "errorMessage" Elements Text Content.
@@ -595,9 +607,6 @@ const focusedInput = ()=>{
         datasetContainer.innerHTML = '';
     });
 };
-//const addressToName = () => {
-//  if(nftSearchAddress.value === )
-//}
 //*Function Calls
 searchAddressSubmit();
 focusedInput();

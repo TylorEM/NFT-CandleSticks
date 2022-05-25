@@ -4,19 +4,18 @@ import FetchWrapper from './helpers'
 // Creating a Variable called "API" which contains the FetchWrapper Class w/ the baseURL as its Argument.
 const API = new FetchWrapper('https://api.opensea.io/api/v1/')
 
-// DOM Selectors for HTML Elements.
-//* Id
+//* DOM Selectors for HTML Elements.
+
+// Id
 const nftSearchForm = document.querySelector('#nft-search-form')
 const nftSearchAddress = document.querySelector('#nft-search-address')
 const errorMessage = document.querySelector('#address-error')
 
-//* Class
+// Class
 const nftName = document.querySelector('.nft-name')
 const datasetContainer = document.querySelector('.dataset-container')
 
-// Creating a hard coded Variable (for now) called "collectionSlug" which contains the Collection-Slug of the NFT.
-
-//*Functions
+//*Functions & API Calls
 
 // Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
 const getApiName = () => {
@@ -33,14 +32,42 @@ const getApiName = () => {
         .then((statsData) => {
           // Testing to see if the floor price data is received.
           console.log(statsData.stats.floor_price)
+
           // Accessing all of the stats Keys and placing them in a created Variable "statsKeys"
           const statsKeys = Object.keys(statsData.stats)
+
           // Accessing the "floor-price" Key by Looping through the "statsKeys" with the .find Method and placing it within the Variable "floorPriceKey"
           const floorPriceKey = statsKeys
             .find((key) => key === 'floor_price')
             // Using the .replace Method to switch the "_" to a " ".
             .replace('_', ' ')
-          datasetContainer.innerHTML = `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`
+
+          //* Functions and Variables for the One Day Average Price
+          const oneDayAveragePriceString = statsKeys
+            .find((key) => key === 'one_day_average_price')
+            .replaceAll('_', ' ')
+
+          const oneDayAveragePriceData = statsData.stats.one_day_average_price
+          console.log(oneDayAveragePriceData.toString().length)
+
+          const oneDayAveragePrice = () => {
+            if (oneDayAveragePriceData.toString().length > 4) {
+              return oneDayAveragePriceData.toString().substring(0, 5)
+            }
+          }
+
+          //* Appending (using .insertAdjacentHTML b/c we are adding HTML to the index.html module) child li Elements to the datasetContainer DOM Selector ul and adding in various stats from the OpenSea API.
+
+          // Appending the Floor Price.
+          datasetContainer.insertAdjacentHTML(
+            'beforeend',
+            `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`
+          )
+          // Appending the One Day Average Price.
+          datasetContainer.insertAdjacentHTML(
+            'beforeend',
+            `<li class="data"><strong>${oneDayAveragePriceString}</strong>: ${oneDayAveragePrice()}</li>`
+          )
         })
         .catch((err) => console.error(err))
     })
@@ -53,18 +80,24 @@ const searchAddressSubmit = () => {
   // Creating a Variable "newError" with the Error message.
   const newError = new Error('Enter the contract address.')
   const messageString = newError.toString()
-  // Form EventListener
+
+  //* Form EventListener
+
   nftSearchForm.addEventListener('submit', (event) => {
     // Prevents the DOM from reloading after submission. This is the default action when submitting forms.
     event.preventDefault()
+
     // Test to see if the Text Input Value is accessible.
     console.log(nftSearchAddress.value)
+
     // If Else statement
     if (nftSearchAddress.value.length === 42) {
       console.log(nftSearchAddress.value.length)
-      //* Function call within the "if" statement that runs the "getAPIName" Function.
+
+      // Function call within the "if" statement that runs the "getAPIName" Function.
       getApiName()
     } else {
+      // Showing error message within the DOM
       errorMessage.textContent = messageString
     }
   })
@@ -80,10 +113,7 @@ const focusedInput = () => {
   })
 }
 
-//const addressToName = () => {
-//  if(nftSearchAddress.value === )
-//}
-
 //*Function Calls
+
 searchAddressSubmit()
 focusedInput()
