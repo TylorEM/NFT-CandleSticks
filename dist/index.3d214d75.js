@@ -527,21 +527,23 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"bB7Pu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "errorMessage", ()=>errorMessage
+);
 // Importing the Default Class "FetchWrapper" from the helper.js Module.
 var _helpers = require("./helpers");
 var _helpersDefault = parcelHelpers.interopDefault(_helpers);
 // Creating a Variable called "API" which contains the FetchWrapper Class w/ the baseURL as its Argument.
 const API = new _helpersDefault.default('https://api.opensea.io/api/v1/');
-// DOM Selectors for HTML Elements.
-//* Id
+//* DOM Selectors for HTML Elements.
+// Id
+const nftName = document.querySelector('#nft-name');
 const nftSearchForm = document.querySelector('#nft-search-form');
 const nftSearchAddress = document.querySelector('#nft-search-address');
 const errorMessage = document.querySelector('#address-error');
-//* Class
-const nftName = document.querySelector('.nft-name');
+// Class
 const datasetContainer = document.querySelector('.dataset-container');
-// Creating a hard coded Variable (for now) called "collectionSlug" which contains the Collection-Slug of the NFT.
-//*Functions
+//*Functions & API Calls
 // Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
 const getApiName = ()=>{
     API.getWithHeaders(`asset_contract/${nftSearchAddress.value}`).then((contractData)=>{
@@ -560,30 +562,42 @@ const getApiName = ()=>{
             const floorPriceKey = statsKeys.find((key)=>key === 'floor_price'
             )// Using the .replace Method to switch the "_" to a " ".
             .replace('_', ' ');
-            datasetContainer.innerHTML = `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`;
-        }).catch((err)=>console.error(err)
-        );
-    })// Using the .catch Method to console log the error, "err", when the Fetch call runs a Promise that ends in a rejected state (ie. Network connection issue).
-    .catch((err)=>console.error(err)
-    );
+            //* Functions and Variables for the One Day Average Price
+            const oneDayAveragePriceString = statsKeys.find((key)=>key === 'one_day_average_price'
+            ).replaceAll('_', ' ');
+            const oneDayAveragePriceData = statsData.stats.one_day_average_price;
+            console.log(oneDayAveragePriceData.toString().length);
+            const oneDayAveragePrice = ()=>{
+                if (oneDayAveragePriceData.toString().length > 4) return oneDayAveragePriceData.toString().substring(0, 5);
+                else return oneDayAveragePriceData;
+            };
+            //* Appending (using .insertAdjacentHTML b/c we are adding HTML to the index.html module) child li Elements to the datasetContainer DOM Selector ul and adding in various stats from the OpenSea API.
+            // Appending the Floor Price.
+            datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`);
+            // Appending the One Day Average Price.
+            datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${oneDayAveragePriceString}</strong>: ${oneDayAveragePrice()}</li>`);
+        });
+    });
 };
 // Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
 const searchAddressSubmit = ()=>{
     // Creating a Variable "newError" with the Error message.
-    const newError = new Error('Enter the contract address.');
-    const messageString = newError.toString();
-    // Form EventListener
+    const newError = new Error('Enter a valid Contract Address.');
+    const messageString = newError.toString().substring(6);
+    //* Form EventListener
     nftSearchForm.addEventListener('submit', (event)=>{
         // Prevents the DOM from reloading after submission. This is the default action when submitting forms.
         event.preventDefault();
         // Test to see if the Text Input Value is accessible.
         console.log(nftSearchAddress.value);
         // If Else statement
+        //? had the idea of trying to move this into the .catch error section of the fetch call to see if I can catch the error when the contract address is 42 characters but the fetch does not complete due to a contract input that does not exist.
         if (nftSearchAddress.value.length === 42) {
             console.log(nftSearchAddress.value.length);
-            //* Function call within the "if" statement that runs the "getAPIName" Function.
+            // Function call within the "if" statement that runs the "getAPIName" Function.
             getApiName();
-        } else errorMessage.textContent = messageString;
+        } else // Showing error message within the DOM
+        errorMessage.textContent = messageString;
     });
 };
 // Created a Function "focusedInput" that adds an EventListener to the search Text Input ("nftSearchAddress") that listens for the search bar to be focused in on. It then clears the search bar's Value and the "errorMessage" Elements Text Content.
@@ -595,16 +609,17 @@ const focusedInput = ()=>{
         datasetContainer.innerHTML = '';
     });
 };
-//const addressToName = () => {
-//  if(nftSearchAddress.value === )
-//}
 //*Function Calls
 searchAddressSubmit();
-focusedInput();
+focusedInput() //0xfe0be00f15ac95f6a2d1b8bea07bfa42e1b81389
+ //0x248139afb8d3a2e16154fbe4fb528a3a214fd8e7
+ //0x78a5e2b8c280fa5580fbe1e1ed546183f959d305
+;
 
 },{"./helpers":"9Ty9u","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9Ty9u":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+var _indexJs = require("./index.js");
 class FetchWrapper {
     constructor(baseURL){
         this.baseURL = baseURL;
@@ -617,8 +632,12 @@ class FetchWrapper {
             headers: {
                 Accept: 'application/json'
             }
-        }).then((response)=>response.json()
-        );
+        }).then((response)=>{
+            if (!response.ok) {
+                console.log('Enter a valid Contract Address');
+                _indexJs.errorMessage.textContent = 'Enter a valid Contract Address.';
+            } else return response.json();
+        });
     }
     //"GET" Method that accepts an API Endpoint as its Parameter.
     get(endpoint) {
@@ -629,7 +648,7 @@ class FetchWrapper {
 }
 exports.default = FetchWrapper;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./index.js":"bB7Pu"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
