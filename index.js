@@ -7,20 +7,28 @@ const API = new FetchWrapper('https://api.opensea.io/api/v1/')
 //* DOM Selectors for HTML Elements.
 
 // Id
+const nftName = document.querySelector('#nft-name')
 const nftSearchForm = document.querySelector('#nft-search-form')
 const nftSearchAddress = document.querySelector('#nft-search-address')
 const errorMessage = document.querySelector('#address-error')
 
 // Class
-const nftName = document.querySelector('.nft-name')
 const datasetContainer = document.querySelector('.dataset-container')
+
+//const handleContractError = (error) => {
+//  if (!response.ok) {
+//    alert(error)
+//  } else {
+//    return response
+//  }
+//}
 
 //*Functions & API Calls
 
 // Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
 const getApiName = () => {
-  API.getWithHeaders(`asset_contract/${nftSearchAddress.value}`)
-    .then((contractData) => {
+  API.getWithHeaders(`asset_contract/${nftSearchAddress.value}`).then(
+    (contractData) => {
       // Dynamically adding Text Content to the nftName
       console.log(contractData.name)
       nftName.textContent = contractData.name
@@ -28,8 +36,8 @@ const getApiName = () => {
 
       // Making a Fetch call within the first Fetch call b/c I need to access the "contractData.collection.slug" data in order to make the second Fetch call.
       //? Possibly could just use the "getWithHeaders" Class Method. Testing Soon...
-      API.get(`collection/${contractData.collection.slug}/stats`)
-        .then((statsData) => {
+      API.get(`collection/${contractData.collection.slug}/stats`).then(
+        (statsData) => {
           // Testing to see if the floor price data is received.
           console.log(statsData.stats.floor_price)
 
@@ -53,6 +61,8 @@ const getApiName = () => {
           const oneDayAveragePrice = () => {
             if (oneDayAveragePriceData.toString().length > 4) {
               return oneDayAveragePriceData.toString().substring(0, 5)
+            } else {
+              return oneDayAveragePriceData
             }
           }
 
@@ -68,18 +78,19 @@ const getApiName = () => {
             'beforeend',
             `<li class="data"><strong>${oneDayAveragePriceString}</strong>: ${oneDayAveragePrice()}</li>`
           )
-        })
-        .catch((err) => console.error(err))
-    })
-    // Using the .catch Method to console log the error, "err", when the Fetch call runs a Promise that ends in a rejected state (ie. Network connection issue).
-    .catch((err) => console.error(err))
+        }
+      )
+      //.catch((error) => handleContractError(error))
+    }
+  )
+  //.catch((error) => handleContractError(error))
 }
 
 // Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
 const searchAddressSubmit = () => {
   // Creating a Variable "newError" with the Error message.
-  const newError = new Error('Enter the contract address.')
-  const messageString = newError.toString()
+  const newError = new Error('Enter a contract address.')
+  const messageString = newError.toString().substring(6)
 
   //* Form EventListener
 
@@ -91,6 +102,7 @@ const searchAddressSubmit = () => {
     console.log(nftSearchAddress.value)
 
     // If Else statement
+    //? had the idea of trying to move this into the .catch error section of the fetch call to see if I can catch the error when the contract address is 42 characters but the fetch does not complete due to a contract input that does not exist.
     if (nftSearchAddress.value.length === 42) {
       console.log(nftSearchAddress.value.length)
 
@@ -117,3 +129,7 @@ const focusedInput = () => {
 
 searchAddressSubmit()
 focusedInput()
+
+//0xfe0be00f15ac95f6a2d1b8bea07bfa42e1b81389
+//0x248139afb8d3a2e16154fbe4fb528a3a214fd8e7
+//0x78a5e2b8c280fa5580fbe1e1ed546183f959d305
