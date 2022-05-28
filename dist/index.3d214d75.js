@@ -527,6 +527,9 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"bB7Pu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "errorMessage", ()=>errorMessage
+);
 // Importing the Default Class "FetchWrapper" from the helper.js Module.
 var _helpers = require("./helpers");
 var _helpersDefault = parcelHelpers.interopDefault(_helpers);
@@ -540,13 +543,6 @@ const nftSearchAddress = document.querySelector('#nft-search-address');
 const errorMessage = document.querySelector('#address-error');
 // Class
 const datasetContainer = document.querySelector('.dataset-container');
-//const handleContractError = (error) => {
-//  if (!response.ok) {
-//    alert(error)
-//  } else {
-//    return response
-//  }
-//}
 //*Functions & API Calls
 // Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
 const getApiName = ()=>{
@@ -581,14 +577,12 @@ const getApiName = ()=>{
             // Appending the One Day Average Price.
             datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${oneDayAveragePriceString}</strong>: ${oneDayAveragePrice()}</li>`);
         });
-    //.catch((error) => handleContractError(error))
     });
-//.catch((error) => handleContractError(error))
 };
 // Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
 const searchAddressSubmit = ()=>{
     // Creating a Variable "newError" with the Error message.
-    const newError = new Error('Enter a contract address.');
+    const newError = new Error('Enter a valid Contract Address.');
     const messageString = newError.toString().substring(6);
     //* Form EventListener
     nftSearchForm.addEventListener('submit', (event)=>{
@@ -625,6 +619,7 @@ focusedInput() //0xfe0be00f15ac95f6a2d1b8bea07bfa42e1b81389
 },{"./helpers":"9Ty9u","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"9Ty9u":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+var _indexJs = require("./index.js");
 class FetchWrapper {
     constructor(baseURL){
         this.baseURL = baseURL;
@@ -637,8 +632,12 @@ class FetchWrapper {
             headers: {
                 Accept: 'application/json'
             }
-        }).then((response)=>response.json()
-        );
+        }).then((response)=>{
+            if (!response.ok) {
+                console.log('Enter a valid Contract Address');
+                _indexJs.errorMessage.textContent = 'Enter a valid Contract Address.';
+            } else return response.json();
+        });
     }
     //"GET" Method that accepts an API Endpoint as its Parameter.
     get(endpoint) {
@@ -649,7 +648,7 @@ class FetchWrapper {
 }
 exports.default = FetchWrapper;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./index.js":"bB7Pu"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a

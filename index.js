@@ -10,18 +10,10 @@ const API = new FetchWrapper('https://api.opensea.io/api/v1/')
 const nftName = document.querySelector('#nft-name')
 const nftSearchForm = document.querySelector('#nft-search-form')
 const nftSearchAddress = document.querySelector('#nft-search-address')
-const errorMessage = document.querySelector('#address-error')
+export const errorMessage = document.querySelector('#address-error')
 
 // Class
 const datasetContainer = document.querySelector('.dataset-container')
-
-//const handleContractError = (error) => {
-//  if (!response.ok) {
-//    alert(error)
-//  } else {
-//    return response
-//  }
-//}
 
 //*Functions & API Calls
 
@@ -80,16 +72,14 @@ const getApiName = () => {
           )
         }
       )
-      //.catch((error) => handleContractError(error))
     }
   )
-  //.catch((error) => handleContractError(error))
 }
 
 // Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
 const searchAddressSubmit = () => {
   // Creating a Variable "newError" with the Error message.
-  const newError = new Error('Enter a contract address.')
+  const newError = new Error('Enter a valid Contract Address.')
   const messageString = newError.toString().substring(6)
 
   //* Form EventListener
