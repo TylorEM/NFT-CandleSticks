@@ -538,19 +538,23 @@ const API = new _helpersDefault.default('https://api.opensea.io/api/v1/');
 //* DOM Selectors for HTML Elements.
 // Id
 const nftName = document.querySelector('#nft-name');
+const nftDescription = document.querySelector('#nft-description');
 const nftSearchForm = document.querySelector('#nft-search-form');
 const nftSearchAddress = document.querySelector('#nft-search-address');
+const submitInput = document.querySelector('#submit-input');
 const errorMessage = document.querySelector('#address-error');
 // Class
 const datasetContainer = document.querySelector('.dataset-container');
 //*Functions & API Calls
 // Creating a Function "getAPIName" that is receiving "contractData" and "statsData" (two separate fetch calls b/c they come from different endpoints) from the OpenSea API using the FetchWrapper Class' "getWithHeaders" & "get" Methods.
-const getApiName = ()=>{
+const getApiData = ()=>{
     API.getWithHeaders(`asset_contract/${nftSearchAddress.value}`).then((contractData)=>{
         // Dynamically adding Text Content to the nftName
         console.log(contractData.name);
-        nftName.textContent = contractData.name;
+        //nftName.textContent = contractData.name
+        nftName.innerHTML = `<a href="${contractData.external_link}" target="_blank">${contractData.name}</a>`;
         console.log(contractData.collection.slug);
+        nftDescription.textContent = `${contractData.collection.description}`;
         // Making a Fetch call within the first Fetch call b/c I need to access the "contractData.collection.slug" data in order to make the second Fetch call.
         //? Possibly could just use the "getWithHeaders" Class Method. Testing Soon...
         API.get(`collection/${contractData.collection.slug}/stats`).then((statsData)=>{
@@ -576,7 +580,15 @@ const getApiName = ()=>{
             datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${floorPriceKey}</strong>: ${statsData.stats.floor_price}</li>`);
             // Appending the One Day Average Price.
             datasetContainer.insertAdjacentHTML('beforeend', `<li class="data"><strong>${oneDayAveragePriceString}</strong>: ${oneDayAveragePrice()}</li>`);
-        });
+        }).catch((error)=>console.log(error)
+        );
+    }).catch((error)=>console.log(error)
+    );
+};
+// Created a function "disableSubmit" that sets the Disabled attribute on the "submitInput" to disabled, when the form is submitted.
+const disableSubmit = ()=>{
+    nftSearchForm.addEventListener('submit', ()=>{
+        submitInput.setAttribute('disabled', 'disabled');
     });
 };
 // Created a Function "searchAddressSubmit" that attaches an EventListener to the Form and either shows an Error within the "errorMessage" Element or, currently, Console Logs the length of the Contract Address.
@@ -591,11 +603,10 @@ const searchAddressSubmit = ()=>{
         // Test to see if the Text Input Value is accessible.
         console.log(nftSearchAddress.value);
         // If Else statement
-        //? had the idea of trying to move this into the .catch error section of the fetch call to see if I can catch the error when the contract address is 42 characters but the fetch does not complete due to a contract input that does not exist.
         if (nftSearchAddress.value.length === 42) {
             console.log(nftSearchAddress.value.length);
-            // Function call within the "if" statement that runs the "getAPIName" Function.
-            getApiName();
+            //* Function call within the "if" statement that runs the "getAPIName" Function.
+            getApiData();
         } else // Showing error message within the DOM
         errorMessage.textContent = messageString;
     });
@@ -603,15 +614,19 @@ const searchAddressSubmit = ()=>{
 // Created a Function "focusedInput" that adds an EventListener to the search Text Input ("nftSearchAddress") that listens for the search bar to be focused in on. It then clears the search bar's Value and the "errorMessage" Elements Text Content.
 const focusedInput = ()=>{
     nftSearchAddress.addEventListener('focus', ()=>{
+        // Reset
         nftSearchAddress.value = '';
         errorMessage.textContent = '';
         nftName.textContent = '';
+        nftDescription.textContent = '';
         datasetContainer.innerHTML = '';
+        submitInput.removeAttribute('disabled');
     });
 };
 //*Function Calls
 searchAddressSubmit();
-focusedInput() //0xfe0be00f15ac95f6a2d1b8bea07bfa42e1b81389
+focusedInput();
+disableSubmit() //0xfe0be00f15ac95f6a2d1b8bea07bfa42e1b81389
  //0x248139afb8d3a2e16154fbe4fb528a3a214fd8e7
  //0x78a5e2b8c280fa5580fbe1e1ed546183f959d305
 ;
